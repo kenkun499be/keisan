@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  
+<link href="https://fonts.googleapis.com/css2?family=Rounded+Mplus+1c&display=swap" rel="stylesheet" />
+  <link rel="icon" href="favicon.ico" type="/keisan/favicon.ico">
+
+  <link rel="manifest" href="/keisan/manifest.json" />
+  <meta name="theme-color" content="#d6336c" />
+
+  <link rel="apple-touch-icon" href="/keisan/icons/icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>正負を含む四則演算</title>
+  <style>
+    body {
+      font-family: 'Rounded Mplus 1c', sans-serif;
+      padding: 20px;
+      background-color: #fff0f5;
+      color: #444;
+      position: relative;
+      min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+    }
+    h2 {
+      color: #d6336c;
+    }
+    button {
+      background-color: #ff9ce3;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 12px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background-color 0.3s;
+      user-select: none;
+      z-index: 1100;
+    }
+    button:hover {
+      background-color: #ff7cd6;
+    }
+    .hidden {
+      display: none;
+    }
+    .problem {
+      font-size: 24px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+    }
+    .input-section {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      flex-wrap: nowrap;
+    }
+    input[type="number"] {
+      width: 80px;
+      height: 40px;
+      text-align: center;
+      border: 2px solid #ffb6d5;
+      border-radius: 8px;
+      padding: 5px;
+      font-size: 20px;
+      background-color: #fff;
+      margin: 5px;
+      z-index: 1100;
+    }
+    input[type="text"] {
+      width: 80px;
+      height: 40px;
+      text-align: center;
+      border: 2px solid #ffb6d5;
+      border-radius: 8px;
+      padding: 5px;
+      font-size: 20px;
+      background-color: #fff;
+      margin: 5px;
+      z-index: 1100;
+    }
+    .line {
+      border-top: 2px solid #ff69b4;
+      width: 80px;
+      margin: 2px 0;
+    }
+    label {
+      display: block;
+      margin: 10px 0;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #d6336c;
+      font-weight: bold;
+    }
+
+    /* ホームボタンとリセットボタン */
+    #homeButton, #resetButton {
+      position: absolute;
+      top: 10px;
+      background-color: #ffb3e6;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 12px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      font-family: 'Rounded Mplus 1c', sans-serif;
+      user-select: none;
+      z-index: 1100;
+    }
+    #homeButton:hover, #resetButton:hover {
+      background-color: #ff7cd6;
+    }
+    #homeButton {
+      right: 10px;
+    }
+    #resetButton {
+      right: 90px;
+    }
+
+    /* 描画キャンバスを全画面化 */
+    #drawingCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      border: none;
+      border-radius: 0;
+      z-index: 1000; /* ボタンより下に */
+      touch-action: none; /* スマホでスムーズに描画 */
+      background: transparent;
+    }
+
+    /* スマホ対応 */
+    @media screen and (max-width: 600px) {
+      .problem {
+        font-size: 20px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+      }
+      input[type="number"] {
+        width: 60px;
+        height: 36px;
+        font-size: 18px;
+      }
+      .line {
+        width: 60px;
+      }
+      #homeButton, #resetButton {
+        padding: 6px 10px;
+        font-size: 14px;
+      }
+      #resetButton {
+        right: 80px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="settings">
+    <h2>問題の設定</h2>
+    <button id="homeButton" onclick="location.href='/keisan'">ホーム</button>
+    <label>数値の範囲: <input type="number" id="numRangeMin" value="-10" /> ～ <input type="number" id="numRangeMax" value="10" /></label>
+    <button onclick="startQuiz()">開始</button>
+    <div id="error"></div>
+  </div>
+
+  <div id="quiz" class="hidden">
+    <button id="homeButton" onclick="location.href='/keisan'">ホーム</button>
+    <button id="resetButton" onclick="resetDrawing()">リセット</button>
+    <div class="problem" id="problem"></div>
+    <canvas id="drawingCanvas"></canvas>
+    <div class="input-section">
+      <input type="text" id="answer" />
+      <button onclick="checkAnswer()">確定</button>
+    </div>
+    <div id="result"></div>
+  </div>
+
+  <div id="resultScreen" class="hidden">
+    <div id="summary"></div>
+    <button onclick="goHome()">設定へ戻る</button>
+    <button onclick="nextProblem()">次の問題へ</button>
+  </div>
+
+  <script>
+    let currentAnswer;
+    let includeDecimals = false;
+
+   function startQuiz() {
+  const templates = [
+    "a × b × K",
+    "a × K2 × b ÷ K2 × c",
+    "a × b",
+    "a × b × c",
+    "a + a",
+    "b + b"
+  ];
+
+  // テンプレートからランダムに選ぶ
+  const template = templates[Math.floor(Math.random() * templates.length)];
+
+  // ランダム数字生成（1〜10、符号つき、0を除く）
+  function randomIntExceptZero(min, max) {
+  let n = 0;
+  while (n === 0) {
+    n = Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+  return n;
+}
+
+  // ランダム数字セット
+  const min = parseInt(document.getElementById('numRangeMin').value, 10);
+const max = parseInt(document.getElementById('numRangeMax').value, 10);
+
+const nums = {
+  a: randomIntExceptZero(min, max),
+  a2: randomIntExceptZero(min, max),
+  b: randomIntExceptZero(min, max),
+  c: randomIntExceptZero(min, max),
+  K: randomIntExceptZero(min, max),
+  K1: randomIntExceptZero(min, max),  // 必要に応じて範囲変えてもOK
+  K2: randomIntExceptZero(min, max),
+  x: randomIntExceptZero(min, max),
+};
+
+  // 変数を符号付き文字列に変換する関数
+  function formatNum(val, variableName = "") {
+    if (val === 1 && variableName) return variableName;
+    if (val === -1 && variableName) return "−" + variableName;
+    if (val < 0) return "−" + Math.abs(val) + (variableName || "");
+    return val + (variableName || "");
+  }
+
+  // テンプレートから問題文を作成
+  function generateProblemFromTemplate(tmpl, n) {
+    let problemStr = tmpl;
+    problemStr = problemStr.replace(/a/g, formatNum(n.a, "a"));
+    problemStr = problemStr.replace(/b/g, formatNum(n.b, "b"));
+    problemStr = problemStr.replace(/c/g, formatNum(n.c, "c"));
+    problemStr = problemStr.replace(/K1/g, formatNum(n.K1));
+    problemStr = problemStr.replace(/K2/g, formatNum(n.K2));
+    problemStr = problemStr.replace(/K/g, formatNum(n.K));
+    problemStr = problemStr.replace(/x/g, formatNum(n.x, "χ")); // x→χ
+
+    return problemStr;
+  }
+
+  const problemText = generateProblemFromTemplate(template, nums);
+
+  // 答え計算関数（変数含む計算）
+  function calculateAnswerWithVariables(template, nums) {
+  const usedVars = [...new Set(template.match(/[abcx]/g))];
+  let expression = template;
+
+  // 一時プレースホルダーに置換
+  expression = expression
+    .replace(/\bK1\b/g, '__K1__')
+    .replace(/\bK2\b/g, '__K2__')
+    .replace(/\bK\b/g, '__K__')
+    .replace(/\ba\b/g, '__a__')
+    .replace(/\bb\b/g, '__b__')
+    .replace(/\bc\b/g, '__c__')
+    .replace(/\bx\b/g, '__x__');
+
+  // 演算子をJavaScript形式に変換
+  expression = expression
+    .replace(/×/g, '*')
+    .replace(/÷/g, '/');
+
+  // 実際の数値で置換
+  expression = expression
+    .replace(/__K1__/g, `(${nums.K1})`)
+    .replace(/__K2__/g, `(${nums.K2})`)
+    .replace(/__K__/g, `(${nums.K})`)
+    .replace(/__a__/g, `(${nums.a})`)
+    .replace(/__b__/g, `(${nums.b})`)
+    .replace(/__c__/g, `(${nums.c})`)
+    .replace(/__x__/g, `(${nums.x})`);
+
+  let value;
+  let error = false;
+
+  try {
+    value = eval(expression);
+  } catch (e) {
+    error = true;
+  }
+
+  const variableStr = usedVars.join("");
+  return error ? "?" : `${value}${variableStr}`;
+}
+
+
+  // currentAnswerにセット（ここ重要）
+  const answer = calculateAnswerWithVariables(template, nums);
+currentAnswer = answer;
+
+
+  // 問題文を表示
+  document.getElementById('problem').textContent = problemText + " = ?";
+
+  // UIの切り替え
+  document.getElementById('settings').classList.add('hidden');
+  document.getElementById('quiz').classList.remove('hidden');
+  document.getElementById('answer').value = '';
+  document.getElementById('result').textContent = '';
+
+  // 描画キャンバス初期化
+  clearCanvas();
+}
+
+
+
+
+    function generateRandomNumber(min, max) {
+      const num = includeDecimals ? (Math.random() * (max - min) + min).toFixed(1) : Math.floor(Math.random() * (max - min + 1) + min);
+      if(num === 0 && includeDecimals === false){
+        return 1;
+      }
+      return parseFloat(num);
+    }
+
+    function calculateAnswer(num1, num2, op) {
+      switch (op) {
+        case '+': return num1 + num2;
+        case '-': return num1 - num2;
+        case '*': return num1 * num2;
+        case '/': return num1 / num2;
+      }
+    }
+
+    function checkAnswer() {
+  const userAnswerRaw = document.getElementById('answer').value.trim();
+
+if (userAnswerRaw === "") {
+  document.getElementById('result').textContent = '回答を入力してください。';
+  return;
+}
+
+
+const normalizedUserAnswer = userAnswerRaw.replace(/\s+/g, '').toLowerCase();
+const normalizedCorrectAnswer = currentAnswer.replace(/\s+/g, '').toLowerCase();
+
+const isCorrect = normalizedUserAnswer === normalizedCorrectAnswer;
+
+const summaryText = `
+  <div>問題: ${document.getElementById('problem').textContent}</div>
+  <div>正解: ${currentAnswer}</div>
+  <div>あなたの回答: ${userAnswerRaw}</div>
+  <div style="color: ${isCorrect ? '#ff558c' : '#000bdf'}; font-weight: bold;">${isCorrect ? '正解' : '不正解'}</div>
+`;
+
+document.getElementById('summary').innerHTML = summaryText;
+document.getElementById('quiz').classList.add('hidden');
+document.getElementById('resultScreen').classList.remove('hidden');
+}
+
+    function nextProblem() {
+      document.getElementById('resultScreen').classList.add('hidden');
+      document.getElementById('quiz').classList.remove('hidden');
+      clearCanvas();
+      startQuiz();
+    }
+
+    function goHome() {
+      document.getElementById('settings').classList.remove('hidden');
+      document.getElementById('quiz').classList.add('hidden');
+      document.getElementById('resultScreen').classList.add('hidden');
+      clearCanvas();
+      document.getElementById('result').textContent = '';
+    }
+
+
+    const canvas = document.getElementById('drawingCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let lines = [];
+    let currentLine = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      redrawLines();
+    }
+
+    function redrawLines() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#ff69b4';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+
+      for (const line of lines) {
+        if (line.length < 2) continue;
+        ctx.beginPath();
+        ctx.moveTo(line[0].x, line[0].y);
+        for (let i = 1; i < line.length; i++) {
+          ctx.lineTo(line[i].x, line[i].y);
+        }
+        ctx.stroke();
+      }
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    let drawing = false;
+
+    canvas.addEventListener('mousedown', (e) => {
+      drawing = true;
+      currentLine = [{ x: e.clientX, y: e.clientY }];
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (!drawing) return;
+      const point = { x: e.clientX, y: e.clientY };
+      currentLine.push(point);
+
+      ctx.strokeStyle = '#ff69b4';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+
+      ctx.beginPath();
+      const lastPoint = currentLine[currentLine.length - 2];
+      ctx.moveTo(lastPoint.x, lastPoint.y);
+      ctx.lineTo(point.x, point.y);
+      ctx.stroke();
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      if (!drawing) return;
+      drawing = false;
+      if (currentLine.length > 1) lines.push(currentLine);
+      currentLine = [];
+    });
+
+    canvas.addEventListener('mouseout', () => {
+      if (!drawing) return;
+      drawing = false;
+      if (currentLine.length > 1) lines.push(currentLine);
+      currentLine = [];
+    });
+
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      drawing = true;
+      currentLine = [{ x: touch.clientX, y: touch.clientY }];
+    });
+
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (!drawing) return;
+      const touch = e.touches[0];
+      const point = { x: touch.clientX, y: touch.clientY };
+      currentLine.push(point);
+
+      ctx.strokeStyle = '#ff69b4';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+
+      ctx.beginPath();
+      const lastPoint = currentLine[currentLine.length - 2];
+      ctx.moveTo(lastPoint.x, lastPoint.y);
+      ctx.lineTo(point.x, point.y);
+      ctx.stroke();
+    });
+
+    canvas.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      if (!drawing) return;
+      drawing = false;
+      if (currentLine.length > 1) lines.push(currentLine);
+      currentLine = [];
+    });
+
+    canvas.addEventListener('touchcancel', (e) => {
+      e.preventDefault();
+      if (!drawing) return;
+      drawing = false;
+      if (currentLine.length > 1) lines.push(currentLine);
+      currentLine = [];
+    });
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      lines = [];
+      currentLine = [];
+    }
+
+    function resetDrawing() {
+      clearCanvas();
+      document.getElementById('result').textContent = '';
+    }
+  </script>
+</body>
+</html>
