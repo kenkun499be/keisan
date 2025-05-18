@@ -159,6 +159,7 @@
     <h2>問題の設定</h2>
     <button id="homeButton" onclick="location.href='/keisan'">ホーム</button>
     <label>数値の範囲: <input type="number" id="numRangeMin" value="-10" /> ～ <input type="number" id="numRangeMax" value="10" /></label>
+    <label>項の数: <input type="number" id="termCount" value="2" min="1" max="7" /></label>
     <label><input type="checkbox" id="includeDecimals">計算式に小数を含む</label>
     <fieldset>
       <legend>演算子:</legend>
@@ -210,19 +211,38 @@
         return;
       }
 
-      const num1 = generateRandomNumber(minNum, maxNum);
-      const num2 = generateRandomNumber(minNum, maxNum);
-      const op = operations[Math.floor(Math.random() * operations.length)];
-      let displayOp = op;
+      const termCount = Math.max(2, parseInt(document.getElementById('termCount').value) || 2);
 
-      if (op === '*') {
-        displayOp = '×';
-      } else if (op === '/') {
-        displayOp = '÷';
-      }
+let expression = '';
+let displayExpression = '';
+let nums = [];
 
-      currentAnswer = calculateAnswer(num1, num2, op);
-      document.getElementById('problem').textContent = `${num1} ${displayOp} ${num2} = ?`;
+for (let i = 0; i < termCount; i++) {
+  const num = generateRandomNumber(minNum, maxNum);
+  nums.push(num);
+  expression += num;
+  displayExpression += num;
+
+  if (i < termCount - 1) {
+    const op = operations[Math.floor(Math.random() * operations.length)];
+    expression += op;
+
+    let displayOp = op;
+    if (op === '*') displayOp = '×';
+    if (op === '/') displayOp = '÷';
+    displayExpression += ' ' + displayOp + ' ';
+  }
+}
+
+try {
+  currentAnswer = eval(expression); // 安全性に注意
+} catch (e) {
+  document.getElementById('error').textContent = '項の数は7個までにしてください。';
+  return;
+}
+
+document.getElementById('problem').textContent = `${displayExpression} = ?`;
+
       document.getElementById('answer').value = '';
       document.getElementById('settings').classList.add('hidden');
       document.getElementById('quiz').classList.remove('hidden');
