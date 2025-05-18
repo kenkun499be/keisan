@@ -1,4 +1,4 @@
-const CACHE_NAME = 'calc-tools-v0.2.2';
+const CACHE_NAME = 'calc-tools-v0.2.3';
 const urlsToCache = [
   '/keisan/',
   '/keisan/index.html',
@@ -53,4 +53,4 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-console.log('Service Worker version: v0.2.2');
+console.log('Service Worker version: v0.2.3');
