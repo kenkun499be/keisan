@@ -1,6 +1,6 @@
 {
   "name": "計算問題ツール",
-  "short_name": "計算ツール",
+  "short_name": "計算問題",
   "start_url": "/keisan",
   "display": "standalone",
   "background_color": "#fff0f5",
