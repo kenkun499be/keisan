@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/keisan/icons/icon-192.png" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>文字の式</title>
+  <title>正負を含む四則演算</title>
   <style>
     body {
       font-family: 'Rounded Mplus 1c', sans-serif;
@@ -49,6 +49,7 @@
     .problem {
       font-size: 24px;
       margin-bottom: 20px;
+      margin-top: 50px;
       display: flex;
       align-items: center;
       justify-content: flex-start;
@@ -178,7 +179,6 @@
   <div id="quiz" class="hidden">
     <button id="homeButton" onclick="location.href='/keisan'">ホーム</button>
     <button id="resetButton" onclick="resetDrawing()">リセット</button>
-    <br><br>
     <div class="problem" id="problem"></div>
     <canvas id="drawingCanvas"></canvas>
     <div class="input-section">
