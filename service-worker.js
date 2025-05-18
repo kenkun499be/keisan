@@ -52,3 +52,5 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
+console.log('Service Worker version: v0.2.2');
