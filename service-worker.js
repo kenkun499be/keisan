@@ -4,6 +4,7 @@ const urlsToCache = [
   '/keisan/index.html',
   '/keisan/bunsuu/index.html',
   '/keisan/sisokuenzan/index.html',
+  '/keisan/mojinosiki/index.html',
   '/keisan/manifest.json',
   '/keisan/icons/icon-192.png',
   '/keisan/icons/icon-512.png'
