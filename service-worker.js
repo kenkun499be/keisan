@@ -1,12 +1,12 @@
 const CACHE_NAME = 'calc-tools-v1';
 const urlsToCache = [
   '/',
-  '/index.html',
-  '/bunsuu/index.html',
-  '/sisokuenzan/index.html',
-  '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  '/keisan/index.html',
+  '/keisan/bunsuu/index.html',
+  '/keisan/sisokuenzan/index.html',
+  '/keisan/manifest.json',
+  '/keisan/icons/icon-192.png',
+  '/keisan/icons/icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
