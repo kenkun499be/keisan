@@ -1,4 +1,4 @@
-const CACHE_NAME = 'calc-tools-v0.2.3';
+const CACHE_NAME = 'calc-tools-v0.2.4';
 const urlsToCache = [
   '/keisan/',
   '/keisan/index.html',
@@ -8,6 +8,8 @@ const urlsToCache = [
   '/keisan/icons/icon-192.png',
   '/keisan/icons/icon-512.png'
 ];
+
+console.log('Service Worker version: v0.2.4');
 
 // インストール時にキャッシュ
 self.addEventListener('install', (event) => {
@@ -35,22 +37,33 @@ self.addEventListener('activate', (event) => {
   self.clients.claim(); // クライアントを即座に制御
 });
 
-// fetch時のキャッシュ優先 ＋ フォールバック対応
+// fetch時の stale-while-revalidate パターン
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      if (response) {
-        return response; // キャッシュにあれば返す
-      }
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.match(event.request).then((cachedResponse) => {
+        const fetchPromise = fetch(event.request).then((networkResponse) => {
+          // 成功時はキャッシュを更新
+          if (
+            networkResponse &&
+            networkResponse.status === 200 &&
+            event.request.method === 'GET' &&
+            !event.request.url.includes('chrome-extension')
+          ) {
+            cache.put(event.request, networkResponse.clone());
+          }
+          return networkResponse;
+        }).catch(() => {
+          // オフライン時
+          if (cachedResponse) return cachedResponse;
+          if (event.request.mode === 'navigate') {
+            return cache.match('/keisan/index.html');
+          }
+        });
 
-      return fetch(event.request).catch(() => {
-        // ナビゲーション時は index.html を返す（オフライン対策）
-        if (event.request.mode === 'navigate') {
-          return caches.match('/keisan/index.html');
-        }
+        // キャッシュがあれば即返す、なければネットワーク
+        return cachedResponse || fetchPromise;
       });
     })
   );
 });
-
-console.log('Service Worker version: v0.2.3');
