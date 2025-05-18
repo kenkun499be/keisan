@@ -1,7 +1,7 @@
 {
   "name": "計算問題ツール",
   "short_name": "計算ツール",
-  "start_url": "/",
+  "start_url": "/keisan",
   "display": "standalone",
   "background_color": "#fff0f5",
   "theme_color": "#d6336c",
