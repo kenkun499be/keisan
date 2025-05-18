@@ -1,6 +1,6 @@
 const CACHE_NAME = 'calc-tools-v1';
 const urlsToCache = [
-  '/',
+  '/keisan',
   '/keisan/index.html',
   '/keisan/bunsuu/index.html',
   '/keisan/sisokuenzan/index.html',
