@@ -1,4 +1,4 @@
-const CACHE_NAME = 'calc-tools-v0.3.2';
+const CACHE_NAME = 'calc-tools-v0.3.3';
 const urlsToCache = [
   '/keisan/',
   '/keisan/index.html',
