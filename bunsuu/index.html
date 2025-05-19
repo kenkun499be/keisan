@@ -97,7 +97,6 @@
       font-weight: bold;
     }
 
-    /* ホームボタンとリセットボタン */
     #homeButton, #resetButton {
       position: absolute;
       top: 10px;
@@ -123,7 +122,6 @@
       right: 90px;
     }
 
-    /* 描画キャンバスを全画面化 */
     #drawingCanvas {
       position: fixed;
       top: 0;
@@ -132,12 +130,11 @@
       height: 100vh;
       border: none;
       border-radius: 0;
-      z-index: 1000; /* ボタンより下に */
-      touch-action: none; /* スマホでスムーズに描画 */
+      z-index: 1000;
+      touch-action: none;
       background: transparent;
     }
 
-    /* スマホ対応 */
     @media screen and (max-width: 600px) {
       .problem {
         font-size: 20px;
@@ -204,7 +201,6 @@
 
     <div class="problem" id="problem"></div>
 
-    <!-- 全画面キャンバス -->
     <canvas id="drawingCanvas"></canvas>
 
     <div class="input-section">
