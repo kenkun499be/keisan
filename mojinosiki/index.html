@@ -102,7 +102,6 @@
       font-weight: bold;
     }
 
-    /* ホームボタンとリセットボタン */
     #homeButton, #resetButton {
       position: absolute;
       top: 10px;
@@ -128,7 +127,6 @@
       right: 90px;
     }
 
-    /* 描画キャンバスを全画面化 */
     #drawingCanvas {
       position: fixed;
       top: 0;
@@ -137,12 +135,11 @@
       height: 100vh;
       border: none;
       border-radius: 0;
-      z-index: 1000; /* ボタンより下に */
-      touch-action: none; /* スマホでスムーズに描画 */
+      z-index: 1000; 
+      touch-action: none; 
       background: transparent;
     }
 
-    /* スマホ対応 */
     @media screen and (max-width: 600px) {
       .problem {
       font-size: 20px;
@@ -213,10 +210,8 @@
     "b + b"
   ];
 
-  // テンプレートからランダムに選ぶ
   const template = templates[Math.floor(Math.random() * templates.length)];
 
-  // ランダム数字生成（1〜10、符号つき、0を除く）
   function randomIntExceptZero(min, max) {
   let n = 0;
   while (n === 0) {
@@ -225,7 +220,6 @@
   return n;
 }
 
-  // ランダム数字セット
   const min = parseInt(document.getElementById('numRangeMin').value, 10);
 const max = parseInt(document.getElementById('numRangeMax').value, 10);
 
@@ -235,20 +229,17 @@ const nums = {
   b: randomIntExceptZero(min, max),
   c: randomIntExceptZero(min, max),
   K: randomIntExceptZero(min, max),
-  K1: randomIntExceptZero(min, max),  // 必要に応じて範囲変えてもOK
+  K1: randomIntExceptZero(min, max),
   K2: randomIntExceptZero(min, max),
   x: randomIntExceptZero(min, max),
 };
 
-  // 変数を符号付き文字列に変換する関数
   function formatNum(val, variableName = "") {
     if (val === 1 && variableName) return variableName;
     if (val === -1 && variableName) return "−" + variableName;
     if (val < 0) return "−" + Math.abs(val) + (variableName || "");
     return val + (variableName || "");
   }
-
-  // テンプレートから問題文を作成
   function generateProblemFromTemplate(tmpl, n) {
     let problemStr = tmpl;
     problemStr = problemStr.replace(/a/g, formatNum(n.a, "a"));
@@ -257,19 +248,17 @@ const nums = {
     problemStr = problemStr.replace(/K1/g, formatNum(n.K1));
     problemStr = problemStr.replace(/K2/g, formatNum(n.K2));
     problemStr = problemStr.replace(/K/g, formatNum(n.K));
-    problemStr = problemStr.replace(/x/g, formatNum(n.x, "χ")); // x→χ
+    problemStr = problemStr.replace(/x/g, formatNum(n.x, "χ")); 
 
     return problemStr;
   }
 
   const problemText = generateProblemFromTemplate(template, nums);
 
-  // 答え計算関数（変数含む計算）
   function calculateAnswerWithVariables(template, nums) {
   const usedVars = [...new Set(template.match(/[abcx]/g))];
   let expression = template;
 
-  // 一時プレースホルダーに置換
   expression = expression
     .replace(/\bK1\b/g, '__K1__')
     .replace(/\bK2\b/g, '__K2__')
@@ -279,12 +268,10 @@ const nums = {
     .replace(/\bc\b/g, '__c__')
     .replace(/\bx\b/g, '__x__');
 
-  // 演算子をJavaScript形式に変換
   expression = expression
     .replace(/×/g, '*')
     .replace(/÷/g, '/');
 
-  // 実際の数値で置換
   expression = expression
     .replace(/__K1__/g, `(${nums.K1})`)
     .replace(/__K2__/g, `(${nums.K2})`)
@@ -308,21 +295,19 @@ const nums = {
 }
 
 
-  // currentAnswerにセット（ここ重要）
   const answer = calculateAnswerWithVariables(template, nums);
 currentAnswer = answer;
 
 
-  // 問題文を表示
   document.getElementById('problem').textContent = problemText + " = ?";
 
-  // UIの切り替え
+
   document.getElementById('settings').classList.add('hidden');
   document.getElementById('quiz').classList.remove('hidden');
   document.getElementById('answer').value = '';
   document.getElementById('result').textContent = '';
 
-  // 描画キャンバス初期化
+
   clearCanvas();
 }
 
