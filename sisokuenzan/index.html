@@ -90,7 +90,6 @@
       font-weight: bold;
     }
 
-    /* ホームボタンとリセットボタン */
     #homeButton, #resetButton {
       position: absolute;
       top: 10px;
@@ -116,7 +115,6 @@
       right: 90px;
     }
 
-    /* 描画キャンバスを全画面化 */
     #drawingCanvas {
       position: fixed;
       top: 0;
@@ -125,12 +123,11 @@
       height: 100vh;
       border: none;
       border-radius: 0;
-      z-index: 1000; /* ボタンより下に */
-      touch-action: none; /* スマホでスムーズに描画 */
+      z-index: 1000;
+      touch-action: none; 
       background: transparent;
     }
 
-    /* スマホ対応 */
     @media screen and (max-width: 600px) {
       .problem {
         font-size: 20px;
@@ -236,7 +233,7 @@ for (let i = 0; i < termCount; i++) {
 }
 
 try {
-  currentAnswer = eval(expression); // 安全性に注意
+  currentAnswer = eval(expression); 
 } catch (e) {
   document.getElementById('error').textContent = '項の数は7個までにしてください。';
   return;
